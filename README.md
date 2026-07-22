@@ -96,19 +96,35 @@ that region cost.
 
 ## Reproducing this
 
-1. Install PostgreSQL and create a database:
+### 1. Set up
 
-       createdb housing
+Install PostgreSQL and create the database:
 
-2. Clone this repo, then create and activate a virtual environment:
+    createdb housing
 
-       python3 -m venv .venv
-       source .venv/bin/activate
-       pip install -r requirements.txt
+Clone this repo, then create and activate a virtual environment:
 
-3. Copy `.env.example` to `.env` and fill in your database credentials.
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install -r requirements.txt
 
-4. Run the ingest script to download and load both datasets.
+Copy `.env.example` to `.env` and fill in your database credentials.
+
+### 2. Get the data
+
+Both datasets are gitignored (too large for GitHub), so download them into `data/` yourself.
+
+Price Paid (a single ~5 GB file):
+
+    curl -o data/pp-complete.csv "https://price-paid-data.publicdata.landregistry.gov.uk/pp-complete.csv"
+
+ASHE earnings: download the annual zips for 2002-2025 from the [ASHE Table 8 page](https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/placeofresidencebylocalauthorityashetable8). Take the revised edition for each year where available, and provisional for the latest year. Unzip each into `data/ashe/ashe_YYYY/`. Only the `Table 8.7a - Annual pay - Gross` file from each release is used. The ONS site rate-limits scripted downloads, so a browser is more reliable than curl for these.
+
+### 3. Load the data
+
+    ./ingest/load_raw.sh
+
+This creates the staging table, bulk-loads Price Paid via `COPY`, and reports the row count (31,346,259).
 
 ## Findings
 
