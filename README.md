@@ -3,7 +3,7 @@
 Analytics pipeline over 31M+ UK property transactions: a PostgreSQL schema,
 analytical SQL, and a Power BI dashboard on regional prices and affordability.
 
-*Work in progress — July 2026.*
+*Work in progress - July 2026.*
 
 ## Overview
 
@@ -12,12 +12,12 @@ can answer alone: not just how house prices have moved since 1995, but how
 they have moved *relative to what people in each region actually earn*.
 
 Prices come from HM Land Registry; earnings from the ONS. The ratio between
-them — median house price divided by median gross annual pay — is the
+them — median house price divided by median gross annual pay - is the
 affordability measure this project is built around.
 
 ## Data sources
 
-### HM Land Registry — Price Paid Data
+### HM Land Registry - Price Paid Data
 
 Every residential property sale registered in England and Wales since January
 1995. Downloaded as the single complete file (`pp-complete.csv`, ~5.1 GiB).
@@ -33,10 +33,10 @@ Every residential property sale registered in England and Wales since January
   (D/S/T/F/O), old-or-new build, and address components down to county level
 - No region column: region is derived from county during schema design
 
-The file is too large to load comfortably into pandas, which is the point —
+The file is too large to load comfortably into pandas, which is the point -
 it forces the analysis into SQL, where it belongs.
 
-### ONS — Annual Survey of Hours and Earnings (ASHE), Table 8
+### ONS - Annual Survey of Hours and Earnings (ASHE), Table 8
 
 Median gross annual pay by region, from a 1% sample of PAYE employee records,
 surveyed each April.
@@ -61,7 +61,7 @@ that region cost.
     notebooks/   Exploratory work
     dashboard/   Power BI report (.pbix)
     docs/        Schema diagram and dashboard screenshots
-    data/        Raw data (gitignored — too large for GitHub)
+    data/        Raw data (gitignored - too large for GitHub)
 
 ## Approach
 
@@ -85,9 +85,9 @@ that region cost.
 - **2025 ASHE figures are provisional.** ONS publishes provisional figures
   each October and revises them the following year. All years to 2024 use the
   revised edition; 2025 uses provisional, and is subject to change.
-- **Methodology breaks.** ASHE 2006 was published under two methodologies;
-  this project uses the edition consistent with 2007 onward. The 2011 edition
-  is the revised release based on SOC 2010.
+- **Edition notes.** ONS published two editions of 2006 under different
+  methodologies; this project uses the revised edition and is consistent with the 2007 methodology onwards. The
+  2011 release used here is the revised edition based on SOC 2010.
 - **ASHE is a sample survey**, not a census, so regional medians carry
   sampling error. ONS publishes coefficients of variation alongside each
   table (the `8.7b` files) which are not used here.
