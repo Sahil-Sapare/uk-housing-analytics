@@ -123,8 +123,11 @@ ASHE earnings: download the annual zips for 2002-2025 from the [ASHE Table 8 pag
 ### 3. Load the data
 
     ./ingest/load_raw.sh
+    python ingest/load_ashe.py
 
-This creates the staging table, bulk-loads Price Paid via `COPY`, and reports the row count (31,346,259).
+First line creates the staging table, bulk-loads Price Paid via `COPY`, and reports the row count (31,346,259).
+
+The second line imports a concatenated ASHE table listing earnings across the years 2002 to 2024 for 12 UK regions.
 
 ## Findings
 
