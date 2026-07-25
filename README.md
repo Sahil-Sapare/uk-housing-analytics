@@ -129,6 +129,25 @@ First line creates the staging table, bulk-loads Price Paid via `COPY`, and repo
 
 The second line imports a concatenated ASHE table listing earnings across the years 2002 to 2024 for 12 UK regions.
 
+## Schema
+
+![Star schema](docs/schema.png)
+
+A star schema built from the raw staging table. The `transactions` fact
+table holds one row per property sale (29.5M rows, standard price-paid
+transactions only), linked by integer keys to two dimensions:
+`dim_region` and `dim_property_type`.
+
+Land Registry data has no region column, so region is derived from its
+county values through `county_region_map`, which maps 132 historic and
+current counties onto the 12 ONS regions. The `earnings` table joins to
+transactions on region and year at query time rather than through an
+enforced key, since it comes from a separate source.
+
+Prices and dates are cast to proper types during the load; `transfer_year`
+is precomputed for grouping. Two indexes support the analytical queries:
+one on year, and a composite on (region, year).
+
 ## Findings
 
 *To be added.*
