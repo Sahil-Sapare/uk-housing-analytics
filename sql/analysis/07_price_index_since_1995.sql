@@ -22,6 +22,7 @@ WITH median_price_by_region_year AS (
            PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY t.price) AS median_price
     FROM transactions t
     LEFT JOIN dim_region r ON t.region_id = r.region_id
+    WHERE t.transfer_year < (SELECT MAX(transfer_year) FROM transactions)
     GROUP BY r.name, t.transfer_year
 ),
 with_first_value AS (
