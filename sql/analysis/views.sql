@@ -40,12 +40,12 @@ GROUP BY r.name, t.transfer_year;
 
 CREATE OR REPLACE VIEW v_price_by_type AS
 SELECT
-    r.region_name,
+    r.name AS region_name,
     t.transfer_year AS year,
-    pt.property_type_name AS property_type,
+    pt.description AS property_type,
     percentile_cont(0.5) WITHIN GROUP (ORDER BY t.price)::int AS median_price
 FROM transactions t
 JOIN dim_region r        ON t.region_id = r.region_id
 JOIN dim_property_type pt ON t.property_type_id = pt.property_type_id
 WHERE t.transfer_year < 2025          -- exclude partial latest year, matching your other views
-GROUP BY r.region_name, t.transfer_year, pt.property_type_name;
+GROUP BY r.name, t.transfer_year, pt.description;
