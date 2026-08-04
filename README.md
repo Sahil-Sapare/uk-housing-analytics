@@ -2,13 +2,33 @@
 
 Analytics pipeline over 31M+ UK property transactions: a PostgreSQL schema, analytical SQL, and a Power BI dashboard on regional prices and affordability.
 
-*Work in progress - July 2026.*
-
 ## Overview
 
 This project combines two open UK datasets to answer a question that neither can answer alone: not just how house prices have moved since 1995, but how they have moved relative to what people in each region actually earn.
 
 Prices come from HM Land Registry; earnings from the ONS. The ratio between them, median house price divided by median gross annual pay, is the affordability measure this project is built around.
+
+## Dashboard
+
+The Power BI report reads from four aggregate SQL views (`v_median_price`, `v_affordability`, `v_volume`, and `v_price_by_type`) rather than the 29.5M-row fact table, so every interaction stays fast. Slicers cross-filter all visuals, and three DAX measures — total transactions, year-on-year price change, and each region's affordability against the national average — drive the headline figures.
+
+### National Overview
+
+![National Overview](dashboard/screenshots/page1-national-overview.png)
+
+Regions ranked by affordability, alongside median-price trends by region since 1995.
+
+### Regional Deep-Dive
+
+![Regional Deep-Dive](dashboard/screenshots/page2-regional-deep-dive.png)
+
+One region at a time: its price trend, sales volume, and how detached, semi-detached, terraced, and flat prices diverge over time.
+
+### Affordability
+
+![Affordability](dashboard/screenshots/page3-affordability.png)
+
+Years of salary per home by region, and each region measured against the national average.
 
 ## Data sources
 
@@ -41,8 +61,8 @@ Place-of-residence is used rather than place-of-work because the comparison of i
     ingest/      Python: download and bulk-load into PostgreSQL
     sql/         Schema build scripts and, under analysis/, the analytical queries
     notebooks/   Exploratory work
-    dashboard/   Power BI report (.pbix)
-    docs/        Schema diagram and dashboard screenshots
+    dashboard/   Power BI report (.pbix) and page screenshots
+    docs/        Schema diagram
     data/        Raw data (gitignored - too large for GitHub)
 
 ## Approach
@@ -50,7 +70,7 @@ Place-of-residence is used rather than place-of-work because the comparison of i
 1. Ingest. Price Paid is bulk-loaded via PostgreSQL's `COPY` into a wide staging table where every column is `TEXT` - loading untyped avoids a single malformed value aborting a 31M-row load (which completed in ~95 seconds). The 24 ASHE spreadsheets, one per year in inconsistent formats, are parsed and combined with pandas.
 2. Schema. A star schema: a typed `transactions` fact table (29.5M standard transactions) linked to `dim_region` and `dim_property_type`, plus an `earnings` table. Region is derived from Land Registry county values via a 132-row `county_region_map`. Indexed on year and on (region, year); the index cut a regional aggregation from ~2.2s to ~0.19s.
 3. Analysis. 13 saved, commented queries in `sql/analysis/`, using CTEs, window functions (`LAG`, `RANK`, `FIRST_VALUE`/`LAST_VALUE`, framed rolling averages), conditional aggregation, and cross-source joins. They build from median price by region and year up to the affordability ratio and the London-North divergence.
-4. Dashboard. Power BI connected to PostgreSQL, reading from aggregate SQL views rather than the raw fact table. *(In progress.)*
+4. Dashboard. Power BI connected to PostgreSQL, reading from aggregate SQL views rather than the raw fact table. Three pages — a national overview, a regional deep-dive with a property-type price breakdown, and an affordability view — with slicers, cross-filtering, and three DAX measures.
 
 ## Schema
 
@@ -115,6 +135,12 @@ ASHE earnings: download the annual zips for 2002-2025 from the [ASHE Table 8 pag
     python ingest/load_ashe.py
 
 The first script creates the staging table, bulk-loads Price Paid via `COPY`, builds the star schema, and reports the row count. The second parses the 24 ASHE spreadsheets into a combined `earnings` table of median pay across 2002 to 2025 for the 12 UK regions.
+
+### 4. Build the views
+
+    psql -d housing -f sql/analysis/views.sql
+
+Creates the four aggregate views the Power BI report reads from. The report in `dashboard/` connects to PostgreSQL and can then be refreshed against them.
 
 ## Licence and attribution
 
